@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--bootstrap cdn -->
+        <!--bootstrap is free framework used for front end web development,make styling of the web page-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="text-center">Product Tracker App</h1>
+            <div class="row">
+                <div class="col-lg-3"></div>  <!--in order to complete bootstrap bit 16-->
+                <div class="col-lg-6">
+                    <div id="ul">
+                        <form onsubmit="saveToLocalStorage(event)" class="form-group"> <!--when i hit submit button onsubmit will get triggered and it will hold on cont price,then const product like that--><!--Wrap labels and form controls in <div class="form-group"> (needed for optimum spacing)-->
+                            <div class="row">
+                                <div class="col-lg-12"> <!--width of the column-->
+                                    <label>Selling Price:</label>
+                                    <input type="text" id="sellings" name="sellings" class="form-control" required> <!--Add class .form-control to all textual <input>, <textarea>, and <select> elements-->
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12"> <!--width of the column-->
+                                    <label>Product Name:</label>
+                                    <input type="text" id="products" name="products" class="form-control" required> <!--Add class .form-control to all textual <input>, <textarea>, and <select> elements-->
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <label>Choose a category:</label>
+                                    <select name="category" id="category" class="form-control">
+                                        <option>Electronics</option>
+                                        <option>Food</option>
+                                        <option>Skin Care</option>
+                                    </select>
+                                <input type="submit" id="submit" name="submit" value ="Add Product" class="btn btn-primary btn-block btn-lg">    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-3"></div>
+            </div>
+        </div>
+        <ul id="listofitems"></ul> <!--To create a basic list group, use an <ul>-->
+        <!-- how do i make network call from one computer to another means i have to use axios. Axios is the code written by someone and we are just downloading that code and with the help of library called axios we are using that code. Also axios helps to communicate between front end to the server,front end run on your com[puter and server runs on cloud -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
+        <script>
+            function saveToLocalStorage(event){
+                event.preventDefault();
+                const price = event.target.sellings.value;
+                const product = event.target.products.value;
+                const categor = event.target.category.value;
+
+                const obj = {
+                    price,
+                    product,
+                    categor
+                }
+                
+                //post request helps to connect front to backend
+                //In order make website dynamic in nature we have to use backend. crudcrud website which provides backend api for free
+                //post requires object
+                //axios.post it is an asynchronous event it executes after some delay
+                
+                axios.post("https://crudcrud.com/api/8ab40d1116c049b3981b9a3b5bef0026/productTracker",obj)
+                .then((response)=>{
+                    showUserOnScreen(response.data);
+                    console.log(response);
+                })
+                .catch((err)=>{
+                    console.log(err);
+                })
+                //localStorage.setItem(obj.product,JSON.stringify(obj)) // storing as key, stringify object is stored
+                //showUserOnScreen(obj);
+            }
+            //showing saved userdetails on console where inside data you can see saved data eventhough you have refreshed the page,data wont be lost
+            //get does not requires object
+            //axios.get it is an asynchronous event it executes after some delay
+            
+            window.addEventListener("DOMContentLoaded",() =>{
+                axios.get("https://crudcrud.com/api/8ab40d1116c049b3981b9a3b5bef0026/productTracker")
+                .then((response)=>{
+                    console.log(response);
+                    for(var i=0;i<response.data.length;i++){  //in order to show the saved data on screen eventhough u have refreshed the page data wont be deleted from the screen.
+                        showUserOnScreen(response.data[i]);
+                    }
+                })
+                .catch((err)=>{
+                    console.log(err);
+                })
+            })
+
+            function showUserOnScreen(obj){ //output showing on screen when submit button clicked
+                const parentEle = document.getElementById('listofitems');
+                const childEle = document.createElement('li'); //creating li element .
+                childEle.textContent = obj.price+'-'+ obj.product+'-'+obj.categor+'-';
+                parentEle.appendChild(childEle);
+
+                // Get the category heading element based on the selected category
+                //const categoryHeading = document.getElementById(obj.categor.toLowerCase().replace(' ', '-'));
+                //categoryHeading.insertAdjacentElement('afterend', childEle); // Add the product details below the category heading
+                
+                //creating delete button and adding it next to user deatils onscreen
+                const delButton = document.createElement('input');
+                delButton.type = "button";
+                delButton.value = "Delete";
+                childEle.append(delButton);
+
+                delButton.onclick = () => {
+                    axios.delete("https://crudcrud.com/api/8ab40d1116c049b3981b9a3b5bef0026/productTracker/"+obj._id)
+                    .then((response)=>{
+                        parentEle.removeChild(childEle);
+                    })
+                    .catch((err)=>{
+                        console.log(err);
+                    })
+                    //localStorage.removeItem(obj.product);
+                    //parentEle.removeChild(childEle);
+                }
+
+            }
+        </script>
+    </body>
+</html>
